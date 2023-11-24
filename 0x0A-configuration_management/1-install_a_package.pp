@@ -1,3 +1,4 @@
+#!/usr/bin/pup
 # This function istalls a package flask from pip3
 
 package { 'flask':
