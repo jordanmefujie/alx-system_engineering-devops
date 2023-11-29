@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+server {
+    # Other server configurations...
+
+    location / {
+        default_type text/plain;
+        echo "Hello World!\n";
+    }
+
+    # Redirect 1: Redirect /redirect1 to https://example.com
+    location /redirect1 {
+        return 301 https://example.com;
+    }
+
+    # Redirect 2: Redirect /redirect2 to http://example.tech
+    location /redirect2 {
+        return 301 http://example.tech;
+    }
+
+    # Redirect 3: Redirect /redirect3 to a different path /newpath
+    location /redirect3 {
+        return 301 /newpath;
+    }
+
+    # Custom 404 Page
+    error_page 404 /not_found_page_404;
+
+    location = /not_found_page_404 {
+        default_type text/plain;
+        echo "Ceci n'est pas une page\n";
+    }
+
+    # Additional configurations...
+}
