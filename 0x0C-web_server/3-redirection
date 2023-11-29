@@ -13,36 +13,39 @@ apt-get install -y nginx
 mkdir /etc/nginx/html
 #  creates an empty index.html file inside the /etc/nginx/html directory.
 touch /etc/nginx/html/index.html
-#  sets the content of the index.html file to "Hello World!" using the echo command.
-echo "Hello World!" > /etc/nginx/html/index.html
-# Sets Nginx to listen on port 80 and serve files from the /etc/nginx/html directory.
-printf %s "server {
-   listen      80;
-   listen      [::]:80 default_server;
-   root        /etc/nginx/html;
-   index       index.html index.htm;
-}
-" > /etc/nginx/sites-available/default
 
-# Configure a new server block for redirection
-echo "server {
-  listen 80;
-  listen [::]:80;
+# Step 2: Replace the default Nginx configuration with the redirection configuration
+sudo sed -i '/server {/a \
+    listen 80;\n\
+\n\
+    server_name _;\n\
+\n\
+    location /redirect_me {\n\
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n\
+    }\n\
+\n\
+    # Additional Nginx configuration can be added here if needed\n\
+\n\
+    # Error page configuration\n\
+    error_page 404 /404.html;\n\
+    location = /404.html {\n\
+        root /usr/share/nginx/html;\n\
+        internal;\n\
+    }\n\
+\n\
+    # Error page configuration\n\
+    error_page 500 502 503 504 /50x.html;\n\
+    location = /50x.html {\n\
+        root /usr/share/nginx/html;\n\
+        internal;\n\
+    }' /etc/nginx/sites-available/default
 
-  root /var/www/html;
+# Step 3: Remove the default Nginx configuration
+sudo rm /etc/nginx/sites-enabled/default
 
-  # Add index.php to the list if you are using PHP
-  index index.html index.htm index.nginx-debian.html;
+# Step 4: Restart Nginx to apply changes
+sudo service nginx restart
 
-  location /redirect_me {
-     return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-  }
-}" | sudo tee /etc/nginx/sites-available/redirect
-
-# Enable the new site configuration
-sudo ln -s /etc/nginx/sites-available/redirect /etc/nginx/sites-enabled/
-
-
-# Test Nginx configuration and reload
-sudo nginx -t
-sudo service nginx reload
+# Output the result for verification
+echo "Configuration completed. Testing the redirection..."
+curl -sI http://localhost/redirect_me/
