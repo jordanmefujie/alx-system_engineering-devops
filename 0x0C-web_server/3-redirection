@@ -1,52 +1,14 @@
 #!/usr/bin/env bash
-# Installs Nginx with the following configurations:
-#+    Listens on port 80.
-#+    Returns a page containing "Hello World!" when queried
-#++    at the root with a curl GET request.
-
-#  updates the package lists for available software packages.
-# Step 1: Install Nginx
-sudo apt-get update
+# Configures Nginx server so that /redirect_me redirects to another page
+if ! nginx -v; then
+sudo apt-get update -y
 sudo apt-get install -y nginx
+fi
 
-# Step 2: Create a configuration file for the redirection
-sudo bash -c 'cat > /etc/nginx/sites-available/redirect_me <<EOF
-server {
-    listen 80;
+echo "Hello World!" | sudo tee /var/www/html/index.html
+sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+replacement="server_name _;\n\tlocation \/redirect_me {\n\t\t return 301 https:\/\/www.youtube.com\/watch?v=QH2-TGUlwu4;\n\t}"
+sed -i "s/server_name _;/$replacement/" /etc/nginx/sites-available/default
 
-    server_name _;
-
-    location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-    }
-
-    # Additional Nginx configuration can be added here if needed
-
-    # Error page configuration
-    error_page 404 /404.html;
-    location = /404.html {
-        root /usr/share/nginx/html;
-        internal;
-    }
-
-    # Error page configuration
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
-        internal;
-    }
-}
-EOF'
-
-# Step 3: Create a symbolic link to enable the site
-sudo ln -s /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
-
-# Step 4: Remove the default Nginx configuration
-sudo rm /etc/nginx/sites-enabled/default
-
-# Step 5: Restart Nginx to apply changes
+sudo ufw allow 'NGINX Full'
 sudo service nginx restart
-
-# Output the result for verification
-echo "Configuration completed. Testing the redirection..."
-curl -sI http://localhost/redirect_me/
