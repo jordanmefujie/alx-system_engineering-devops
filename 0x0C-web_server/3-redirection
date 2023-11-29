@@ -5,45 +5,46 @@
 #++    at the root with a curl GET request.
 
 #  updates the package lists for available software packages.
-apt-get update
-# installs the Nginx web server.
-apt-get install -y nginx
+# Step 1: Install Nginx
+sudo apt-get update
+sudo apt-get install -y nginx
 
-# Creates the /etc/nginx/html directory, which will serve as the document root directory for Nginx.
-mkdir /etc/nginx/html
-#  creates an empty index.html file inside the /etc/nginx/html directory.
-touch /etc/nginx/html/index.html
+# Step 2: Create a configuration file for the redirection
+sudo bash -c 'cat > /etc/nginx/sites-available/redirect_me <<EOF
+server {
+    listen 80;
 
-# Step 2: Replace the default Nginx configuration with the redirection configuration
-sudo sed -i '/server {/a \
-    listen 80;\n\
-\n\
-    server_name _;\n\
-\n\
-    location /redirect_me {\n\
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n\
-    }\n\
-\n\
-    # Additional Nginx configuration can be added here if needed\n\
-\n\
-    # Error page configuration\n\
-    error_page 404 /404.html;\n\
-    location = /404.html {\n\
-        root /usr/share/nginx/html;\n\
-        internal;\n\
-    }\n\
-\n\
-    # Error page configuration\n\
-    error_page 500 502 503 504 /50x.html;\n\
-    location = /50x.html {\n\
-        root /usr/share/nginx/html;\n\
-        internal;\n\
-    }' /etc/nginx/sites-available/default
+    server_name _;
 
-# Step 3: Remove the default Nginx configuration
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+
+    # Additional Nginx configuration can be added here if needed
+
+    # Error page configuration
+    error_page 404 /404.html;
+    location = /404.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+
+    # Error page configuration
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+}
+EOF'
+
+# Step 3: Create a symbolic link to enable the site
+sudo ln -s /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
+
+# Step 4: Remove the default Nginx configuration
 sudo rm /etc/nginx/sites-enabled/default
 
-# Step 4: Restart Nginx to apply changes
+# Step 5: Restart Nginx to apply changes
 sudo service nginx restart
 
 # Output the result for verification
