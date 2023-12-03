@@ -1,35 +1,43 @@
 #!/usr/bin/env bash
 
-server {
-    # Other server configurations...
+# Configures a new ubuntu machine by installing
+# Nginx where it should be listening on port 80
+# Serve a page that would return a Hello World string
+#
+# colors
+blue='\e[1;34m'
+brown='\e[0;33m'
+green='\e[1;32m'
+reset='\033[0m'
 
-    location / {
-        default_type text/plain;
-        echo "Hello World!\n";
-    }
+echo -e "${blue}Updating and installing ${brown}Nginx${blue}.${reset}\n"
+sudo apt-get update -y -qq && \
+         sudo apt-get install nginx -y
 
-    # Redirect 1: Redirect /redirect1 to https://example.com
-    location /redirect1 {
-        return 301 https://example.com;
-    }
+echo -e "\n${blue}Setting up some minor stuff.${reset}\n"
 
-    # Redirect 2: Redirect /redirect2 to http://example.tech
-    location /redirect2 {
-        return 301 http://example.tech;
-    }
+# starting nginx service
+sudo service nginx start
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
 
-    # Redirect 3: Redirect /redirect3 to a different path /newpath
-    location /redirect3 {
-        return 301 /newpath;
-    }
+# Give the user ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-    # Custom 404 Page
-    error_page 404 /not_found_page_404;
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
 
-    location = /not_found_page_404 {
-        default_type text/plain;
-        echo "Ceci n'est pas une page\n";
-    }
+# Creating new index
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
-    # Additional configurations...
-}
+# Setting up /redirect_me to a youtube video
+sudo sed -i '24i\        rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
+
+# Set up a 404 page
+echo "Ceci n'est pas une page" >> /var/www/html/error_404.html
+sudo sed -i '25i\        error_page 404 /error_404.html;' /etc/nginx/sites-available/default
+# Restarting nginx
+sudo service nginx restart
+
+echo -e "\n${green}Completed.${reset} \n"

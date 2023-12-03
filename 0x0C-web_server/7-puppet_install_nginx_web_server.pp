@@ -1,43 +1,25 @@
 #!/usr/bin/env bash
+# Setup New Ubuntu server with nginx
 
-class nginx {
-  package { 'nginx':
-    ensure => installed,
-  }
-
-  service { 'nginx':
-    ensure  => running,
-    enable  => true,
-    require => Package['nginx'],
-  }
-
-  file { '/etc/nginx/sites-available/default':
-    ensure => present,
-    content => template('nginx_config/default.erb'),
-    notify => Service['nginx'],
-  }
-
-  file { '/var/www/html/index.html':
-    ensure  => present,
-    content => "Hello World!\n",
-    require => Package['nginx'],
-  }
+exec { 'update system':
+        command => '/usr/bin/apt-get update',
 }
 
-class { 'nginx': }
+package { 'nginx':
+        ensure => 'installed',
+        require => Exec['update system']
+}
 
-# Redirect configuration
-nginx::resource::vhost { 'redirect_me':
-  www_root  => '/var/www/html',
-  ensure    => present,
-  port      => '80',
-  priority  => '10',
-  server_name => ['_'],
-  location   => [
-    {
-      'location' => '~^/redirect_me',
-      'ensure'   => 'present',
-      'content'  => 'return 301 http://example.com;'
-    },
-  ],
+file {'/var/www/html/index.html':
+        content => 'Hello World!'
+}
+
+exec {'redirect_me':
+        command => 'sed -i "24i\        rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;" /etc/nginx/sites-available/default',
+        provider => 'shell'
+}
+
+service {'nginx':
+        ensure => running,
+        require => Package['nginx']
 }
