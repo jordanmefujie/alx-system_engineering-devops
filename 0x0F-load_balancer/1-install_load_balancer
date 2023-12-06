@@ -27,16 +27,14 @@ defaults
     timeout client 50000
     timeout server 50000
 
-frontend webapp
-    bind *:80
-    mode http
-    default_backend webservers
-
-backend webservers
-    mode http
-    balance roundrobin
-    server web-01 223498-web-01:80 check
-    server web-02 223498-web-02:80 check
+frontend  mefualx-frontend
+        bind *:80
+        mode http
+        default_backend mefualx-backend
+backend mefualx-backend
+        balance roundrobin
+        server 223498-web-01 100.25.167.92:80 check
+        server 223498-web-02 18.234.168.83:80 check
 EOF
 
 # Enable HAProxy as a service
