@@ -1,30 +1,35 @@
 #!/usr/bin/env bash
-# Function to display information about a subdomain
-display_info() {
-    domain=$1
-    subdomain=$2
+# Displays informtation about subdomains.
 
-    # Define IP addresses based on the provided information
-    case $subdomain in
-        "www") destination="35.153.51.85" ;;
-        "lb-01") destination="35.153.51.85" ;;
-        "web-01") destination="100.25.167.92" ;;
-        "web-02") destination="18.234.168.83" ;;
-        *) destination="" ;;
-    esac
+# uncomment for debugging purposes.
+#set -x
 
-    # Display the information
-    if [ -n "$destination" ]; then
-        echo "The subdomain ${subdomain} is a A record and points to ${destination}"
-    else
-        echo "Invalid subdomain: ${subdomain}"
-    fi
+# for the checker to work please remove the colors.
+
+# colors
+blue='\e[1;34m'
+brown='\e[0;33m'
+reset='\033[0m'
+
+# variables & parameters
+subdomains=( "www" "lb-01" "web-01" "web-02" )
+domain="$1"
+sub="$2"
+
+dig_cmd () {
+	# func variables
+	sub="$2"
+	INFO="$(dig "$sub.$domain" | grep -A1 'ANSWER SECTION:' | awk 'NR==2')"
+	IP=$(echo "$INFO" | awk '{print $5}')
+	RECORD=$(echo "$INFO" | awk '{print $4}')
+
+	echo -e "${brown}The subdomain ${blue}$sub${brown} is a ${blue}$RECORD${brown} record and points to ${blue}$IP${reset}"
 }
 
-# Main script
-domain="mefualx.tech"
-
-display_info "$domain" "www"
-display_info "$domain" "lb-01"
-display_info "$domain" "223498-web-01"
-display_info "$domain" "223498-web-02"
+if [ $# -eq 1 ]; then
+	for subs in "${subdomains[@]}"; do
+		dig_cmd "$domain" "$subs"
+	done
+elif [ $# -eq 2 ]; then
+	dig_cmd "$domain" "$sub"
+fi
