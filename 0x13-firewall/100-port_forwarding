@@ -1,0 +1,20 @@
+# Specify the file path of the ufw configuration file
+ufw_config_file="/etc/ufw/before.rules"
+
+# Backup the original ufw configuration file
+cp "$ufw_config_file" "$ufw_config_file.bak"
+
+# Add a rule to redirect port 8080/TCP to port 80/TCP in the ufw configuration file
+echo "
+# Port redirection for web-01
+*nat
+:PREROUTING ACCEPT [0:0]
+-A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+COMMIT
+" >> "$ufw_config_file"
+
+# Reload ufw to apply the changes
+ufw reload
+
+# Print a message indicating that the configuration is complete
+echo "Port 8080/TCP redirected to port 80/TCP on web-01."
