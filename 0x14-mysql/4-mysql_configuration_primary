@@ -1,0 +1,8 @@
+# 4-mysql_configuration_primary.cnf
+
+[mysqld]
+bind-address = 0.0.0.0  # Comment out or remove this line to allow connections from any IP
+
+server-id = 1
+log_bin = /var/log/mysql/mysql-bin.log
+binlog_do_db = tyrell_corp
