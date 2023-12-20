@@ -33,10 +33,14 @@ defaults
         errorfile 503 /etc/haproxy/errors/503.http
         errorfile 504 /etc/haproxy/errors/504.http
 
-frontend http
-        bind *:80
-        http-request set-header X-Forwarded-Proto http
-        default_backend web-backend
+# Redirect HTTP to HTTPS
+frontend http-frontend
+    bind *:80
+    mode http
+    option forwardfor
+    reqadd X-Forwarded-Proto:\ http
+    acl is_https hdr(X-Forwarded-Proto) https
+    http-request redirect scheme https if !is_https
 
 # Frontend configuration for SSL termination
 frontend www-frontend
@@ -47,6 +51,5 @@ frontend www-frontend
 # Backend configuration
 backend www-backend
     balance roundrobin
-    redirect scheme https if !{ ssl_fc }
     server 223498-web-01 100.25.167.92 check port 80
     server 223498-web-02 18.234.168.83 check port 80
