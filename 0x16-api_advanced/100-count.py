@@ -8,7 +8,6 @@ def count_words(subreddit, word_list):
     """Count the titles found with wordlist in subreddit"""
     my_list = recurse(subreddit)
     my_dict = {}
-
     if my_list:
         for word in word_list:
             my_dict[word] = 0
@@ -49,7 +48,9 @@ def recurse(subreddit, hot_list=[]):
         return hot_list
     else:
         return (None)
-'''    
+
+
+'''
 #!/usr/bin/python3
 """ Exporting csv files"""
 import json
@@ -61,7 +62,8 @@ def count_words(subreddit, word_list, after="null", host_list=[]):
     """Read reddit API and return top 10 hotspots """
     username = 'ledbag123'
     password = 'Reddit72'
-    user_pass_dict = {'user': username, 'passwd': password, 'api_type': 'json'}
+    user_pass_dict = {'user': username, 'passwd':
+    password, 'api_type': 'json'}
     headers = {'user-agent': '/u/ledbag123 API Python for Holberton School'}
     payload = {"limit": "100", "after": after}
     url = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
