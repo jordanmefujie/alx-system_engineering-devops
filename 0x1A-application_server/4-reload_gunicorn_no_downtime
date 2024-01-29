@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 # Gracefully reload Gunicorn
 
+# Find the PID of Gunicorn and send HUP signal to reload
 pgrep gunicorn | xargs kill -HUP
+
+echo "Gunicorn reloaded gracefully."
